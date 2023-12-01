@@ -23,25 +23,32 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
+        // Create a user with a unique email
+        $existingUser = User::factory()->create();
         $user = User::factory()->create();
 
+        // Update the profile with a unique email
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
-                'email' => 'test@example.com',
+                'email' => 'unique@example.com',
             ]);
 
+        // Assert that the update was successful
         $response
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 
+        // Refresh the user instance from the database
         $user->refresh();
 
+        // Assert that the user's profile has been updated
         $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
+        $this->assertSame('unique@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
     }
+
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
